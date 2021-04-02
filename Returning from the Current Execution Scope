@@ -1,0 +1,17 @@
+CREATE PROCEDURE ReportPink AS
+IF NOT EXISTS
+(SELECT ProductID
+FROM Production.Product
+WHERE Color = 'Pink')
+BEGIN
+--Return the value 100 to indicate no pink products
+RETURN 100;
+END;
+SELECT ProductID
+FROM Production.Product
+WHERE Color = 'Pink';
+
+
+DECLARE @ResultStatus int;
+EXEC @ResultStatus = ReportPink;
+PRINT @ResultStatus;
