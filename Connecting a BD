@@ -1,1 +1,2 @@
+-- When you first launch SQL Server Management Studio you are connected by default to the master database 
 USE AdventureWorks2008R2;
