@@ -1,0 +1,18 @@
+The default sort order is an ascending sort. NULL values sort to the top in an ascending sort.
+You want to sort by columns not returned by the query.
+Solution
+Simply specify the columns you wish to sort by. They do not need to be in your query results
+You can sort by any column. It doesn’t matter whether that column is in the SELECT list. What does matter is that
+the column must be available to the query.
+ordering by unselected columns is that ORDER BY items must appear in the SELECT list if
+SELECT DISTINCT is specified
+Forcing Unusual Sort Orders
+  SELECT p.ProductID,
+    p.Name,
+    p.Color
+    FROM Production.Product AS p
+    WHERE p.Color IS NOT NULL
+    ORDER BY CASE p.Color
+    WHEN 'Red' THEN NULL
+    ELSE p.Color
+    END;
