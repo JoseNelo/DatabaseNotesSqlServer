@@ -1,0 +1,18 @@
+--Some of the values in a column might be NULL. You wish to identify rows having or not having NULL values.
+--Solution
+Make use of the IS NULL and IS NOT NULL tests to identify rows having or not having NULL values in a given
+column. For example, the following query returns any rows for which the value of the product’s weight is
+unknown:
+SELECT ProductID,
+Name,
+Weight
+FROM Production.Product
+WHERE Weight IS NULL;
+
+NULL values cannot be identified using operators such as = and <> that are designed to compare two values
+and return a TRUE or FALSE result
+Weight = NULL yields the value UNKNOWN, which is neither TRUE nor FALSE
+Weight <> NULL also yields UNKNOWN
+IS NULL however, is specifically designed to return TRUE when a value is NULL. Likewise, the expression IS
+NOT NULL returns TRUE when a value is not NULL. Predicates involving IS NULL and IS NOT NULL enable you to
+filter for rows having or not having NULL values in one or more columns.
