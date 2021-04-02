@@ -1,0 +1,46 @@
+Choosing Between ISNULL and COALESCE
+in a SELECT Statement
+
+ISNULL is easier to spell, and the name makes more sense; use COALESCE only if you have
+more than two arguments and even then consider chaining your calls to ISNULL to avoid
+
+COALESCE, like so: ISNULL(value1, ISNULL(value2, ISNULL(value3, ''))).
+
+ISNULL ISNULL validates whether an expression is NULL and, if so, replaces the NULL value with an
+alternate value.
+COALESCE The COALESCE function returns the first non-NULL value from a provided list of expressions.
+NULLIF NULLIF returns a NULL value when the two provided expressions have the same value.
+Otherwise, the first expression is returned.
+
+ISNULL en una funcion que recibe dos parametros de entrada, isnull( a, b), que valida si un valor en a es null si es asi es sustituido por el 
+segundo parametro que recibe la funcion, de lontrario devuelve el primer argumento de la funcion.
+
+Coalesce( expression , [,...n] ):   esta funcion retorna el la primera ocurrencia de un valor NO NULL 
+
+SELECT c.CustomerID,
+SalesPersonPhone = spp.PhoneNumber,
+CustomerPhone = pp.PhoneNumber,.
+
+PhoneNumber = COALESCE(pp.PhoneNumber, spp.PhoneNumber, '**NO PHONE**')
+....
+
+EN el anterior ejemplo , coalesce hara igual el valor PhoneNumber al primer valor de la lista que no sea null, es decir, si de los tres en la lista de 
+expresion los dos primero son null, entonce sera igual a NO PHONE.
+
+Diferencias entre isnull y coalesce:
+  ISNULL is simply a version of COALESCE that is limited to two parameters.
+  ISNULL is a function that is built into the SQL Server engine and evaluated at query-processing time
+  
+  COALESCE is expanded into a CASE expression during query compilation
+  difference between the two functions is the data type returned by the function when the parameters are different data types
+  
+  
+  SELECT ISNULL(cast(NULL as char(30)), '20 characters*******') ;
+
+SELECT ISNULL('null1', 'String Value , es null y se reeemplaza') As MiValor ;
+
+SELECT  isnull ( COALESCE(null,5+1+null,'5'+null), 100)
+
+
+select isnull(cast(NULL as char(5)), '20caraaarararsHSHajhktest'); En este caso, observar que Se modifica el tipo de datos del valor NULL con CAST aun char de 5 caracteres
+y cuando se va a imprimir los valores al ser NULL se trunca el resultado segun lo indicado por chat(5)
