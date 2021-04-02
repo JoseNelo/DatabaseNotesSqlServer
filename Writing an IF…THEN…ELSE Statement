@@ -1,0 +1,27 @@
+IF Boolean_expression
+{ sql_statement | statement_block }
+[ ELSE
+{ sql_statement | statement_block } ]
+
+DECLARE @QuerySelector int = 3;
+IF @QuerySelector = 1
+BEGIN
+SELECT TOP 3 ProductID, Name, Color
+FROM Production.Product
+WHERE Color = 'Silver'
+ORDER BY Name
+END
+ELSE
+BEGIN
+SELECT TOP 3 ProductID, Name, Color
+FROM Production.Product
+WHERE Color = 'Black'
+ORDER BY Name
+END;
+
+Your IF expression can be any expression evaluating to TRUE, FALSE, or NULL. You are free to use AND, OR, and
+NOT; parentheses for grouping; and all the common operators that you are used to using for equality, greater than,
+less than, and so forth. The following is a somewhat contrived example showing some of the possibilities:
+IF (@QuerySelector = 1 OR @QuerySelector = 3) AND (NOT @QuerySelector IS NULL)
+
+Because the solution example is written with only one statement in each block, you can omit the BEGIN…END
