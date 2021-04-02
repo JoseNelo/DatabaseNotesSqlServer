@@ -1,0 +1,9 @@
+% The percent sign. Represents a string of zero or more characters
+_ The underscore. Represents a single character
+[…] A list of characters enclosed within square brackets. Represents a single character from among
+any in the list. You may use the hyphen as a shorthand to translate a range into a list. For example,
+[ABCDEF]-flatcan be written more succinctly as[A-F]-flat.You can also mix and match single
+characters and ranges. The expressions[A-CD-F]-flat, [A-DEF]-flat, and [ABC-F]-flat all mean the
+same thing and ultimately resolve to [ABCDEF]-flat.
+[^…] A list of characters enclosed within square brackets and preceeded by a caret. Represents a single
+character from among any not in the list.
