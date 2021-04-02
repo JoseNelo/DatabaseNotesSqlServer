@@ -1,0 +1,12 @@
+any operator (for example, +, -, AND, and OR)
+when either operand is NULL is NULL.
+• NULL + 10 = NULL
+• NULL OR TRUE = NULL
+• NULL OR FALSE = NULL
+
+
+ISNULL ISNULL validates whether an expression is NULL and, if so, replaces the NULL value with an
+alternate value.
+COALESCE The COALESCE function returns the first non-NULL value from a provided list of expressions.
+NULLIF NULLIF returns a NULL value when the two provided expressions have the same value.
+Otherwise, the first expression is returned.
