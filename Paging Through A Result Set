@@ -1,0 +1,11 @@
+SELECT ProductID, Name
+FROM Production.Product
+ORDER BY Name
+OFFSET 8 ROWS FETCH NEXT 10 ROWS ONLY;  
+
+Changing the offset from 0 to 8 will fetch another 10 rows. The offset will skip the first eight rows. There will
+be a two-row overlap with the preceding result set
+
+Use OFFSET to specify how many rows to skip from the beginning of the possible result set. Use FETCH to set the
+number of rows to return. You can change either value as you wish from one execution to the next.
+You must specify an ORDER BY clause! OFFSET and FETCH are actually considered as part of that clause
