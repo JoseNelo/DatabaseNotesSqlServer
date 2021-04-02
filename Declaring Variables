@@ -1,0 +1,28 @@
+you want to build a
+search string, store that search string into a variable, and reference the string in the WHERE clause of a subsequent
+query
+
+
+Execute a DECLARE statement. Specify the variable and the data type.
+Variables are objects you can create to temporarily contain data.
+new variable that is prefixed by the @ symbol and followed by the defining data type
+DECLARE @AddressLine1 nvarchar(60)
+DECLARE @AddressLine1 nvarchar(60) = 'Heiderplatz';
+
+
+You can also specify a value by executing a SET statement, and prior to SQL Server 2008, you are required to
+do so. Here's an example:
+DECLARE @AddressLine1 nvarchar(60);
+SET @AddressLine1 = 'Heiderplatz';
+
+WHERE AddressLine1 LIKE '%' + @AddressLine1 + '%'
+
+It's possible to declare a variable without assigning a value. In that case, the variable is said to be null. Here's
+an example:
+DECLARE @AddressLine1 nvarchar(60);
+SELECT @AddressLine1;
+Results from this query are as follows:
+---------------------------------------
+NULL
+(1 row(s) affected)
+
