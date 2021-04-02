@@ -1,0 +1,22 @@
+DECLARE @AddressLine1 nvarchar(60);
+DECLARE @AddressLine2 nvarchar(60);
+SELECT @AddressLine1 = AddressLine1, @AddressLine2 = AddressLine2
+FROM Person.Address
+WHERE AddressID = 66;
+SELECT @AddressLine1 AS Address1, @AddressLine2 AS Address2;
+
+
+declare @Persontype1 nvarchar(60);
+  declare @Persontype2 nvarchar(60);
+  select TOP (1000) @Persontype1 = PersonType, @Persontype2 = PersonType from [AdventureWorks2014].[Person].[Person] where [BusinessEntityID] =1
+
+  select @Persontype1, @Persontype2;
+  
+  Caution I t is critical when using the technique in this recipe to make sure to write queries that can return at  most one row. 
+  Do that by specifying either a primary key or a unique key in the WHERE clause.
+  
+  
+  
+  
+  
+  most one row. Do that by specifying either a primary key or a unique key in the WHERE clause.   most one row. Do that by specifying either a primary key or a unique key in the WHERE clause.
