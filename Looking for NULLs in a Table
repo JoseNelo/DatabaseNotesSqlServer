@@ -1,0 +1,12 @@
+To search for NULL values, use the unary operators IS NULL and IS NOT NULL
+The ISNULL function is often confused with the IS NULL operator
+
+there are some differences in how the SQL Server query plan
+optimizer decides how to execute statements with IS NULL vs. ISNULL used as a predicate in a SELECT statement
+All three statements return the same rows, but there is a difference in
+the execution plan.
+
+By using the IS NULL operator, SQL Server is able to seek on the index instead of scan the index. ISNULL() is
+a function, when a column is passed into a function SQL Server must evaluate that function for every row and is
+not able to seek on an index to satisfy the WHERE clause.
+
