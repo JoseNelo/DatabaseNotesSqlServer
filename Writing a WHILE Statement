@@ -1,0 +1,27 @@
+
+WHILE Boolean_expression
+BEGIN
+{ sql_statement | statement_block }
+END;
+
+...
+WHILE (SELECT COUNT(*) FROM @AWTables) > 0
+BEGIN
+SELECT TOP 1 @TableName = SchemaTable
+FROM @AWTables
+ORDER BY SchemaTable;
+EXEC sp_spaceused @TableName;
+DELETE @AWTables
+WHERE SchemaTable = @TableName;
+END;
+
+
+WHILE (1=1)
+BEGIN
+PRINT 'Endless While, because 1 always equals 1.';
+IF 1=1
+BEGIN
+PRINT 'But we won''t let the endless loop happen!';
+BREAK; --Because this BREAK statement terminates the loop.
+END;
+END;
