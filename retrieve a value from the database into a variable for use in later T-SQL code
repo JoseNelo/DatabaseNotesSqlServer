@@ -14,9 +14,6 @@ declare @Persontype1 nvarchar(60);
   
   Caution I t is critical when using the technique in this recipe to make sure to write queries that can return at  most one row. 
   Do that by specifying either a primary key or a unique key in the WHERE clause.
-  
-  
-  
-  
-  
-  most one row. Do that by specifying either a primary key or a unique key in the WHERE clause.   most one row. Do that by specifying either a primary key or a unique key in the WHERE clause.
+   
+ 
+  most one row. Do that by specifying either a primary key or a unique key in the WHERE clause.
