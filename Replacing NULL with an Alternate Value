@@ -1,0 +1,6 @@
+  
+  
+  SELECT ISNULL(1, 'String Value') ;
+  
+  SELECT ISNULL(CAST(NULL AS INT), 'String Value') ;    ========NO =======
+  SELECT ISNULL(CAST(NULL AS CHAR(10)), '20 characters*******') ;
