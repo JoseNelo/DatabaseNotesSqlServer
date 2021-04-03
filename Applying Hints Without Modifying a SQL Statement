@@ -1,0 +1,16 @@
+SQL Server provides a solution to this common issue using plan guides
+Plan guides allow you to apply hints
+to a query without having to change the actual query text sent from the application
+
+Plan guides can be applied to specific queries embedded within database objects
+
+To remove or disable a plan guide, use the sp_control_plan_guide system stored procedure
+
+If, for example, I want SQL Server to use a different join method, but without having to change the actual
+query sent by the application, I can enforce this change by creating a plan guide. The following plan guide is
+created to apply a join hint onto the query being sent from the application:
+
+USE AdventureWorks2012;
+GO
+SELECT name, is_disabled, scope_type_desc, hints
+FROM sys.plan_guides;
