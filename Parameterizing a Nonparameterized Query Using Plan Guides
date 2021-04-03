@@ -1,0 +1,73 @@
+You have been monitoring the server health and have noticed that there is a very large query cache filled with
+nearly identical queries.
+
+For applications that make heavy use of ad hoc queries, I’ll often see a very large query cache filled with
+nearly identical queries.
+
+USE AdventureWorks2014;
+GO
+SELECT cp.objtype, st.text
+FROM sys.dm_exec_cached_plans cp
+CROSS APPLY sys.dm_exec_sql_text(cp.plan_handle) st
+WHERE st.text LIKE 'SELECT BusinessEntityID%';
+GO
+
+
+
+If you cannot control the form in which queries are called by the execution, one option you have is to use a
+plan guide to force parameterization of the query
+
+The sp_get_query_template system stored procedure makes deploying template plan guides a little easier
+by taking a query and outputting the parameterized form of it for use by sp_create_ plan_guide
+
+SELECT BusinessEntityID
+FROM HumanResources.Employee
+WHERE NationalIDNumber = 509647174
+
+SELECT BusinessEntityID
+FROM HumanResources.Employee
+WHERE NationalIDNumber = 245797967
+
+SELECT BusinessEntityID
+FROM HumanResources.Employee
+WHERE NationalIDNumber = 295847284
+
+SELECT cp.objtype, st.text
+FROM sys.dm_exec_cached_plans cp
+CROSS APPLY sys.dm_exec_sql_text(cp.plan_handle) st
+WHERE st.text LIKE 'SELECT BusinessEntityID%';
+GO
+
+DECLARE @sql nvarchar(max) DECLARE @parms nvarchar(max)
+EXEC sp_get_query_template
+N'SELECT BusinessEntityID FROM HumanResources.Employee WHERE NationalIDNumber = 295847284',
+@sql OUTPUT,
+@parms OUTPUT;
+EXEC sp_create_plan_guide N'PG_Employee_Contact_Ouery', @sql,
+N'TEMPLATE', NULL, @parms, N'OPTION(PARAMETERIZATION FORCED)';
+
+USE AdventureWorks2014;
+GO
+SELECT BusinessEntityID
+FROM HumanResources.Employee
+WHERE NationalIDNumber = 509647174;
+
+GO
+SELECT BusinessEntityID
+FROM HumanResources.Employee
+WHERE NationalIDNumber = 245797967;
+
+GO
+SELECT BusinessEntityID
+FROM HumanResources.Employee
+WHERE NationalIDNumber = 295847284;
+GO
+
+USE AdventureWorks2014;
+GO
+SELECT usecounts,objtype,text
+FROM sys.dm_exec_cached_plans cp
+CROSS APPLY sys.dm_exec_sql_text(cp.plan_handle) st
+WHERE st.text LIKE '%SELECT BusinessEntityID%' AND objtype = 'Prepared';
+
+
