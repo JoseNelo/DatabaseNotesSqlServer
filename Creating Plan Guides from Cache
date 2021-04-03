@@ -1,0 +1,47 @@
+You are planning the migration of a database to a new server. You want to ensure that a particular query
+continues to perform the same on the new server as the current server.  
+
+In SQL Server (since SQL Server 2008), you have the ability to create plan guides based on existing query plans in
+a query plan cache using the sp_create_plan_guide_from_handle system stored procedure.
+
+I can retrieve the plan handle pointing to the query plan in the cache by executing
+the following query:
+USE AdventureWorks2012;
+GO
+SELECT plan_handle
+FROM sys.dm_exec_query_stats qs
+CROSS APPLY sys.dm_exec_sql_text(plan_handle) t
+WHERE t.text LIKE 'SELECT%p.Title%'
+AND t.text LIKE '%Ms%';
+
+
+USE AdventureWorks2014;
+GO
+SELECT
+p.Title,
+p.FirstName,
+p.MiddleName,
+p.LastName
+FROM HumanResources.Employee e
+INNER JOIN Person.Person p
+ON p.BusinessEntityID = e.BusinessEntityID
+WHERE Title = 'Ms.';
+GO
+
+USE AdventureWorks2014;
+GO
+SELECT plan_handle
+FROM sys.dm_exec_query_stats qs
+CROSS APPLY sys.dm_exec_sql_text(plan_handle) t
+WHERE t.text LIKE 'SELECT%p.Title%'
+AND t.text LIKE '%Ms%';
+
+EXEC sp_create_plan_guide_from_handle 'PlanGuide_EmployeeContact',
+@plan_handle =
+0x060010006163B302401E81A87001000001000000000000000000000000000000000000000000000000000000,
+@statement_start_offset = NULL;
+
+USE AdventureWorks2014;
+GO
+SELECT name, query_text, hints
+FROM sys.plan_guides;
