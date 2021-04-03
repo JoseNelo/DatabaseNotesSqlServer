@@ -1,0 +1,13 @@
+prevent SQL injection for use by this application.
+
+create and use a reusable query execution plan where the only items that change are the query parameters.
+
+The sp_executesql allows you to execute a dynamically generated Unicode string
+
+USE AdventureWorks2012;
+GO
+EXECUTE sp_executesql N'SELECT TransactionID, ProductID, TransactionType, Quantity FROM
+Production.TransactionHistoryArchive WHERE ProductID = @ProductID AND
+TransactionType = @TransactionType AND Quantity > @Quantity', N'@ProductID int, @TransactionType
+char(1), @Quantity int', @ProductID =813, @TransactionType = 'S', @Quantity = 5
+;
