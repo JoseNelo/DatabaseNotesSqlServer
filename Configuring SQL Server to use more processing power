@@ -1,0 +1,32 @@
+how many CPUs there are in the server
+
+SELECT
+cpu_count AS 'Cores'
+,hyperthread_ratio
+FROM
+sys.dm_os_sys_info
+
+The hyperthread_ratio column given in this query does not distinguish between actual
+hyper-threaded cores and true physical cores
+
+--0 is the default value
+sp_configure 'max degree of parallelism', 0
+RECONFIGURE WITH OVERRIDE
+GO
+
+
+
+use AdventureWorks2014
+set statistics time on
+SELECT * FROM  Sales.SalesOrderDetail
+OPTION (MAXDOP 1)
+set statistics time off
+GO
+
+set statistics time oN
+SELECT
+*
+FROM
+Sales.SalesOrderDetail
+OPTION (MAXDOP 0)
+set statistics time ofF
