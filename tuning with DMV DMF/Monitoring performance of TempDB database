@@ -1,0 +1,122 @@
+TempDB database is one of the system databases
+SQL Server stores its database primarily in two types of files. These are data
+file (.mdf and .ndf file) and log file (.ldf file)
+Data file is a type of database file where SQL Server stores its data  , tables and indexes
+  data file is composed of smaller storage units called pages
+  A page is a block of 8 KB in size.
+  
+  extents are composed of pages
+  extent is a series of 8 contiguous pages.
+  the size of an extent is 64 KB and there are 16 extents per MB
+  
+  two types of extents and these are, uniform extent and mixed extent. 
+    uniform :pages are dedicatedly allocated to a single object only
+    mix:  whose data pages can be allocated to up to 8 different objects, es decir en un mismo extent pueden haber 8kb de datos de  diferentes objetos.
+    
+USE tempdb
+GO
+--Checking if the table exists
+--and dropping if it exists
+IF OBJECT_ID('[dbo].[tbl_TempDBStats]') IS NOT NULL
+DROP TABLE [dbo].[tbl_TempDBStats]
+--Creating a table to store
+--page allocation details
+CREATE TABLE [dbo].[tbl_TempDBStats] (
+session_id SMALLINT
+,database_id SMALLINT
+,user_objects_alloc_page_count BIGINT
+,user_objects_dealloc_page_count BIGINT
+,internal_objects_alloc_page_count BIGINT
+,internal_objects_dealloc_page_count BIGINT
+)
+GO
+
+--Collect page allocation details for
+--current session before executing
+--sample query.
+INSERT INTO [dbo].[tbl_TempDBStats]
+SELECT
+session_id
+,database_id
+,user_objects_alloc_page_count
+,user_objects_dealloc_page_count
+,internal_objects_alloc_page_count
+,internal_objects_dealloc_page_count
+FROM sys.dm_db_session_space_usage WHERE session_id = @@SPID
+GO
+--Checking if the table exists
+--and dropping if it exists
+IF OBJECT_ID('TempDB.dbo.#tbl_SampleData') IS NOT NULL
+DROP TABLE TempDB.dbo.#tbl_SampleData
+GO
+
+--Generating 10 million records and inserting
+--them into temporary table
+SELECT TOP 10000000
+SC1.object_id
+,SC1.column_id
+,SC1.name
+,SC1.system_type_id
+INTO TempDB.dbo.#tbl_SampleData
+FROM sys.columns AS SC1
+CROSS JOIN sys.columns AS SC2
+CROSS JOIN sys.columns AS SC3
+ORDER BY SC1.column_id
+GO
+
+--Collect page allocation details for
+--current session after executing
+--sample query.
+INSERT INTO [dbo].[tbl_TempDBStats]
+SELECT
+session_id
+,database_id
+,user_objects_alloc_page_count
+,user_objects_dealloc_page_count
+,internal_objects_alloc_page_count
+,internal_objects_dealloc_page_count
+FROM sys.dm_db_session_space_usage WHERE session_id = @@SPID
+GO
+
+USE tempdb
+GO
+--Notice the difference in page allocation
+--and deallocation statistic details by looking at
+--collected data.
+SELECT * FROM [dbo].[tbl_TempDBStats]
+GO
+
+--Get file space usage statistics by calculating
+--space of unallocated and allocated pages
+SELECT
+DB_NAME(FSU.database_id) AS DatabaseName
+,MF.Name As LogicalFileName
+,MF.physical_name AS PhysicalFilePath
+,SUM(FSU.unallocated_extent_page_count)*8.0/1024
+AS Free_Space_In_MB,
+SUM(
+FSU.version_store_reserved_page_count
++ FSU.user_object_reserved_page_count
++ FSU.internal_object_reserved_page_count
++ FSU.mixed_extent_page_count
+)*8.0/1024 AS Used_Space_In_MB
+FROM sys.dm_db_file_space_usage AS FSU
+INNER JOIN sys.master_files AS MF
+ON FSU.database_id = MF.database_id
+AND FSU.file_id = MF.file_id
+GROUP BY FSU.database_id,FSU.file_id,MF.Name,MF.physical_name
+
+
+DMVs:  Solo para el tempDB
+sys.dm_db_session_space_usage: returns the total number of pages that have been allocated to and deallocated from TempDB
+sys.dm_db_file_space_usage: space: usage details by providing page allocation and deallocation details for each TempDB file.
+sys.dm_db_task_space_usage: task is consuming how many resources in TempDB database
+
+Discovering responsible T-SQLquery or T-SQL batch
+To discover a query or query batch associated with a task that is consuming
+high resources of TempDB database, join sys.dm_db_task_space_
+usage with sys.dm_exec_requests on session_id and request_
+id, and then CROSS APPLY the result set with sys.dm_exec_sql_
+text() function by passing sql_handle column of sys.dm_exec_
+requests. sys.dm_exec_sql_text() function will return the SQL text
+of the request associated with a task
