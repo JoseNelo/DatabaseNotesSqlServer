@@ -1,0 +1,10 @@
+--setting 1024 MB as a minimum memory for SQL Server
+EXEC sp_configure 'min server memory (MB)',1024
+GO
+RECONFIGURE WITH OVERRIDE;
+GO
+
+EXEC sp_configure 'max server memory (MB)',3000
+GO
+RECONFIGURE WITH OVERRIDE;
+GO
