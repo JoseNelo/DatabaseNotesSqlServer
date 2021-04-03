@@ -1,0 +1,74 @@
+Para el monitoring de Sqlserver tenemos dos tipos de objetos Vistas y funciones , DMV y DMF
+
+En total 6 categorias:
+  sys.dm_exec_*         Queries (cache)
+  sys.dm_db_index_*     indices
+  sys.dm_db_missing_*   indices
+  sys.dm_db_*           BD
+  sys.dm_io_*           I/O
+  sys.dm_os_*           SQL OS internal
+  sys.dm_tran_*         Transacciones
+  
+  Nota: esta data al reiniciar se borran los datos, se puede hacer un reset con
+    DBCC SQLPERF (sys.dm_os_wait_stats', clear)
+    
+    sys.dm_exec_sql_text()        Recupera el sql text recibe el parametro sql_handle
+    sys.dm_exec_query_plan()      Recupera el plan de ejecucion recibe el parametro plan_handle de
+    sys.dm_exec_cursors()         Retorna la lista de todos los cursores en uso con su detalle, recibe session_id como parametro, si el
+                                  valor es cero trae todos los cursores de todas las sesiones.
+    sys.dm_exec_sessions DMV  
+    sys.dm_exec_sql_text DMV 
+                                  
+            
+    --Monitoring currently executing queries
+--and listing them in the order of
+--most resource-consuming to
+--least resource-consuming
+SELECT
+DB_NAME(R.database_id) AS DatabaseName
+,S.original_login_name AS LoginName
+,S.host_name AS ClientMachine
+,S.program_name AS ApplicationName
+,R.start_time AS RequestStartTime
+,ST.text AS SQLQuery
+,QP.query_plan AS ExecutionPlan
+,R.cpu_time AS CPUTime
+,R.total_elapsed_time AS TotalTimeElapsed
+,R.open_transaction_count AS TotalTransactionsOpened
+,R.reads
+,R.logical_reads
+,R.writes AS TotalWrites
+,CASE
+WHEN R.wait_type IS NULL THEN 'Request Not Blocked'
+ELSE 'Request Blocked'
+END AS QueryBlockInfo
+,blocking_session_id AS RequestBlockedBy
+FROM sys.dm_exec_requests AS R
+INNER JOIN sys.dm_exec_sessions AS S
+ON R.session_id = S.session_id
+CROSS APPLY sys.dm_exec_sql_text(R.sql_handle) AS ST
+CROSS APPLY sys.dm_exec_query_plan (R.plan_handle) AS QP
+ORDER BY TotalTimeElapsed DESC
+GO
+
+--Monitoring currently executing cursors
+--and listing them in the order of
+--most expensive to least expensive
+SELECT
+S.host_name AS ClientMachine
+,S.program_name AS ApplicationName
+,S.original_login_name AS LoginName
+,C.name AS CursorName
+,C.properties AS CursorOptions
+,C.creation_time AS CursorCreatinTime
+,ST.text AS SQLQuery
+,C.is_open AS IsCursorOpen
+,C.worker_time/1000 AS DurationInMiliSeconds
+,C.reads AS NumberOfReads
+,C.writes AS NumberOfWrites
+FROM sys.dm_exec_cursors(0) AS C
+INNER JOIN sys.dm_exec_sessions AS S
+ON C.session_id = S.session_id
+CROSS APPLY sys.dm_exec_sql_text(C.sql_handle) AS ST
+ORDER BY DurationInMiliSeconds DESC
+GO
