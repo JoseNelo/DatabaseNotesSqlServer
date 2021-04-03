@@ -1,0 +1,22 @@
+number of reads or writes that occur when a query is executed
+Query the sys.dm_exec_query_stats DMV to view performance statistics for cached query plans.
+
+clear the procedure cache so that you can identify
+the query more easily in this demonstration (remember that you should clear out the procedure cache only on
+test SQL Server instances).
+
+DBCC FREEPROCCACHE; 
+
+
+GO
+USE AdventureWorks2012;
+GO
+SELECT BusinessEntityID, TerritoryID, SalesQuota
+FROM Sales.SalesPerson;
+
+This information is useful for identifying read-intensive and/or write-intensive queries  
+
+Also note that
+sys.dm_exec_query_stats has other useful columns that can measure CPU time (total_worker_time, last_
+worker_time, min_worker_time, and max_worker_time) and .NET CLR object execution time (total_clr_time,
+last_clr_time, min_clr_time, max_clr_time).
