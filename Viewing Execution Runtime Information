@@ -1,0 +1,9 @@
+SQL Server provides four commands that are used to return query and batch execution statistics and
+information:
+SET STATISTICS IO, 
+SET STATISTICS TIME,      (amount of time a query takes to execute from end to end)
+SET STATISTICS PROFILE, and 
+SET STATISTICS XML
+
+logical read values (reads from the data cache),
+high physical (reads from disk)
