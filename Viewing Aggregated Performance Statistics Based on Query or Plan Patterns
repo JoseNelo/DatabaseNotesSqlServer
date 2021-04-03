@@ -1,0 +1,39 @@
+ad hoc queries:  aggregate performance statistics for the similar ad hoc queries.
+
+sys.dm_exec_query_stats
+
+sys.dm_exec_query_stats
+can give an accurate picture of overall aggregated statistics and resource utilization
+
+Si un aplicacion encia queries sin preparar y sin los apropiados valores literales parametrizados, individuales  registros seran generados por cada variacion casi
+identica del query, haciendo dificil agrupar las estadisticas, es decir, qieries casi identicos generaran estadisticas diferentes.
+Por ejemplo cuando ejecutamos el mismo query pero solo cambia los valores literales en la condicion del where,
+
+USE AdventureWorks2012;
+GO
+SELECT t.text,
+st.total_logical_reads
+FROM sys.dm_exec_query_stats st
+CROSS APPLY sys.dm_exec_sql_text(st.sql_handle) t
+WHERE t.text LIKE '%Purchasing.vVendorWithContacts%';
+
+Para manejar esto existen dos columnas en la DMV: sys.dm_exec_query_stats query_hash y quey_plan_hash, ambas columns tienen un binary hash para el mismo query que son 
+identicos a excepcion del valor literal.
+
+USE AdventureWorks2012;
+GO
+SELECT st.query_hash,
+COUNT(t.text) query_count,
+SUM(st.total_logical_reads) total_logical_reads
+FROM sys.dm_exec_query_stats st
+CROSS APPLY sys.dm_exec_sql_text(st.sql_handle) t
+WHERE text LIKE '%Purchasing.vVendorWithContacts%'
+GROUP BY st.query_hash;
+
+this new query_hash column and
+produced a COUNT of the distinct queries using different literal values and a SUM of the logical reads across these
+queries.
+
+I used a GROUP BY clause with the query_hash
+column.
+GROUP BY st.query_hash
