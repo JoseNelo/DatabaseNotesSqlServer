@@ -1,0 +1,14 @@
+Un query que esta tomando el doble del tiempo del usual, queremos saber el numero de registros que retorna ha cambiado.
+
+This query will return values only for queries that are presently
+in the cache.
+
+USE AdventureWorks2014;
+GO
+SELECT t.text,
+st.total_rows,
+st.last_rows,
+st.min_rows,
+st.max_rows
+FROM sys.dm_exec_query_stats st
+CROSS APPLY sys.dm_exec_sql_text(st.sql_handle) t;
