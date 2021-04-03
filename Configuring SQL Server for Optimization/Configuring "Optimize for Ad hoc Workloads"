@@ -1,0 +1,49 @@
+clean up the procedure cache and buffer on the testing server
+
+SELECT
+CP.usecounts AS CountOfQueryExecution
+,CP.cacheobjtype AS CacheObjectType
+,CP.objtype AS ObjectType
+,ST.text AS QueryText
+FROM
+sys.dm_exec_cached_plans AS CP
+CROSS APPLY
+sys.dm_exec_sql_text(plan_handle) AS ST
+WHERE
+CP.usecounts > 0
+GO
+
+DBCC FREEPROCCACHE
+GO
+sys.dm_exec_sql_text(plan_handle) AS ST
+WHERE
+CP.usecounts > 0
+GO
+
+SELECT
+CP.usecounts AS CountOfQueryExecution
+,CP.cacheobjtype AS CacheObjectType
+,CP.objtype AS ObjectType
+,ST.text AS QueryText
+FROM
+sys.dm_exec_cached_plans AS CP
+CROSS APPLY
+sys.dm_exec_sql_text(plan_handle) AS ST
+WHERE
+CP.usecounts > 0
+GO
+
+
+When the new query arrives for the first time, only the query_hash value is kept in memory,
+instead of the entire plan. When the same query arrives for the second time, SQL Server
+identifies that it already has a query_hash for this query  
+
+how much space is consumed by ad hoc queries in a
+procedure cache that has been run only once, you can run following query
+SELECT
+SUM(size_in_bytes) as TotalByteConsumedByAdHoc
+FROM
+sys.dm_exec_cached_plans
+WHERE
+objtype = 'Adhoc'
+AND usecounts = 1
