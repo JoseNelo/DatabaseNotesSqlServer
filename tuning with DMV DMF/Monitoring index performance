@@ -1,0 +1,82 @@
+
+
+--Retrieving Missing Index Details
+SELECT
+MID.Statement AS ObjectName
+,MID.equality_columns
+,MID.inequality_columns
+,MID.included_columns
+,MIGS.avg_user_impact As ExpectedPerformanceImprovement
+,(MIGS. user_seeks + MIGS. user_scans) * MIGS.avg_total_user_cost * MIGS.avg_user_impact As PossibleImprovement
+FROM sys.dm_db_missing_index_details AS MID
+INNER JOIN sys.dm_db_missing_index_groups AS MIG
+ON MID.index_handle = MIG.index_handle
+INNER JOIN sys.dm_db_missing_index_group_stats AS MIGS
+ON MIG.index_group_handle = MIGS.group_handle
+GO
+
+USE AdventureWorks2012
+GO
+--Retrieving Index Usage Information
+SELECT
+O.Name AS ObjectName
+,I.Name AS IndexName
+,IUS.user_seeks
+,IUS.user_scans
+,IUS.last_user_seek
+,IUS.last_user_scan
+FROM sys.dm_db_index_usage_stats AS IUS
+INNER JOIN sys.indexes AS I
+ON IUS.object_id = I.object_id AND IUS.index_id = I.index_id
+INNER JOIN sys.objects AS O
+ON IUS.object_id = O.object_id
+GO
+
+--Retrieving Index Fragmentation Details.
+SELECT
+O.name AS ObjectName
+,I.name AS IndexName
+,IPS.avg_page_space_used_in_percent AS AverageSpaceUsedInPages
+,IPS.avg_fragmentation_in_percent AS AverageFragmentation
+,IPS.fragment_count AS FragmentCount
+,suggestedIndexOperation = CASE
+WHEN IPS.avg_fragmentation_in_percent<=30 THEN 'REORGANIZE
+Index'
+ELSE 'REBUILD Index' END
+FROM sys.dm_db_index_physical_stats(DB_
+ID(),NULL,NULL,NULL,'DETAILED') AS IPS
+INNER JOIN sys.indexes AS I
+ON IPS.object_id = I.object_id AND IPS.index_id = I.index_id
+INNER JOIN sys.objects AS O
+ON IPS.object_id = O.object_id
+WHERE IPS.avg_fragmentation_in_percent > 5
+ORDER BY AverageFragmentation DESC
+GO
+
+sys.dm_db_missing_index_details: son indices que no existen en la BD
+sys.dm_db_missing_index_groups and 
+sys.dm_db_missing_index_group_stats  returns the details regarding any possible improvement in query performance if missing indexes are created
+
+
+To retrieve the index name and objectname, we joined the
+sys.dm_db_index_usage_stats
+sys.indexes and 
+sys.objects
+
+sys.dm_db_index_physical_stats() function   Fragmentacion , y hacemos el join con las siguientes DMV
+sys.indexes and sys.objects
+
+
+DMV:
+sys.dm_db_missing_index_details:        missing index details
+sys.dm_db_missing_index_groups          information about which missing indexes
+sys.dm_db_missing_index_group_stats     statistical details for missing index groups
+sys.dm_db_index_usage_stats             usage statistics for the different types of index operations
+
+DMF:
+sys.dm_db_index_physical_stats          returns the fragmentation details
+Otras DMF:
+sys.dm_db_index_operational_stats
+
+
+sys.dm_db_missing_index_columns
