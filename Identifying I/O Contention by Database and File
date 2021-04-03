@@ -1,0 +1,30 @@
+sys.dm_io_virtual_file_stats DMV (this DMV shows data equivalent to the
+fn_virtualfilestats function).
+
+measured in
+milliseconds and represent the total time users had to wait for read or write I/O operations to complete on a file
+since the instance was last restarted or the database created.
+
+return statistics about each database
+and file on the SQL Server instance
+
+This DMV takes two input parameters: the first is the database ID, and the
+second is the file ID. Designating NULL for the database ID shows results for all databases. Designating NULL for
+the file ID results in showing all files for the database.
+
+USE master;
+GO
+SELECT DB_NAME(ifs.database_id) DatabaseNM,
+ifs.file_id FileID,
+mf.type_desc FileType,
+io_stall IOStallsMs,
+size_on_disk_bytes FileBytes,
+num_of_bytes_written BytesWritten,
+num_of_bytes_read BytesRead
+FROM sys.dm_io_virtual_file_stats(NULL, NULL) ifs
+Inner Join sys.master_files mf
+On ifs.database_id = mf.database_id
+And ifs.file_id = mf.file_id
+ORDER BY io_stall DESC;
+
+sys.dm_io_virtual_file_stats(NULL, NULL)
