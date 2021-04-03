@@ -1,0 +1,20 @@
+your number-one tool for identifying is the sys.dm_os_wait_stats DMV. 
+
+provides a running total of all waits encountered by executing
+threads in the SQL Server instance.
+shows the top two wait types that have accumulated for the SQL Server instance since it
+was last cleared or since the instance started:
+
+USE AdventureWorks2012;
+GO
+SELECT TOP 2
+wait_type, wait_time_ms FROM sys.dm_os_wait_stats WHERE wait_type NOT IN
+('LAZYWRITER_SLEEP', 'SQLTRACE_BUFFER_FLUSH', 'REQUEST_FOR_DEADLOCK_SEARCH', 'LOGMGR_QUEUE',
+'CHECKPOINT_QUEUE', 'CLR_AUTO_EVENT','WAITFOR', 'BROKER_TASK_STOP', 'SLEEP_TASK', 'BROKER_TO_
+FLUSH')
+ORDER BY wait_time_ms DESC;
+
+If you want to clear the currently accumulated wait type statistics, you can then run the following query:
+DBCC SQLPERF ('sys.dm_os_wait_stats', CLEAR);
+
+The DMV’s data is grouped at the instance level, not at the database level
