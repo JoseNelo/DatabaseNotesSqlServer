@@ -1,0 +1,109 @@
+
+
+
+
+--Monitor the database files for all databases.
+SELECT
+DB_NAME(VFS.database_id) AS DatabaseName
+,MF.name AS LogicalFileName
+,MF.physical_name AS PhysicalFileName
+,CASE MF.type
+WHEN 0 THEN 'Data File'
+WHEN 1 THEN 'Log File'
+END AS FileType
+,VFS.num_of_reads AS TotalReadOperations
+,VFS.num_of_bytes_read TotalBytesRead
+,VFS.num_of_writes AS TotalWriteOperations
+,VFS.num_of_bytes_written AS TotalBytesWritten
+,VFS.io_stall_read_ms AS TotalWaitTimeForRead
+,VFS.io_stall_write_ms AS TotalWaitTimeForWrite
+,VFS.io_stall AS TotalWaitTimeForIO
+,VFS.size_on_disk_bytes AS FileSizeInBytes
+FROM sys.dm_io_virtual_file_stats(NULL,NULL) AS VFS
+INNER JOIN sys.master_files AS MF
+ON VFS.database_id = MF.database_id AND VFS.file_id = MF.file_
+id
+ORDER BY VFS.database_id DESC
+GO
+
+USE [AdventureWorks2012]
+GO
+--Clear the data cache.
+DBCC DROPCLEANBUFFERS
+GO
+
+Remember that you should not run the DBCC DROPCLEANBUFFERS
+command on the production database server. Doing so clears the data
+cache of SQL Server and forces subsequent queries to read data from
+disk, which hits the performance. However, you may want to use the DBCC
+DROPCLEANBUFFERS command while performing query tuning in the
+development environment.
+
+USE [AdventureWorks2014]
+GO
+--Clear the data cache.
+DBCC DROPCLEANBUFFERS
+GO
+
+--Exceute a sample query.
+SELECT *
+FROM [Sales].[SalesOrderDetail]
+GO
+
+USE [AdventureWorks2014]
+GO
+--Monitor the database files for AdventureWorks2012.
+--Observe the read operations.
+SELECT
+DB_NAME(VFS.database_id) AS DatabaseName
+,MF.name AS LogicalFileName
+,MF.physical_name AS PhysicalFileName
+,CASE MF.type
+WHEN 0 THEN 'Data File'
+WHEN 1 THEN 'Log File'
+END AS FileType
+,VFS.num_of_reads AS TotalReadOperations
+,VFS.num_of_bytes_read TotalBytesRead
+,VFS.num_of_writes AS TotalWriteOperations
+,VFS.num_of_bytes_written AS TotalBytesWritten
+,VFS.io_stall_read_ms AS TotalWaitTimeForRead
+,VFS.io_stall_write_ms AS TotalWaitTimeForWrite
+,VFS.io_stall AS TotalWaitTimeForIO
+,VFS.size_on_disk_bytes AS FileSizeInBytes
+FROM sys.dm_io_virtual_file_stats(DB_ID(),NULL) AS VFS
+INNER JOIN sys.master_files AS MF
+ON VFS.database_id = MF.database_id AND VFS.file_id = MF.file_id
+ORDER BY VFS.database_id DESC
+GO
+
+--Monitor database files for any
+--pending I/O requests.
+SELECT
+DB_NAME(VFS.database_id) AS DatabaseName
+,MF.name AS LogicalFileName
+,MF.physical_name AS PhysicalFileName
+,CASE MF.type
+WHEN 0 THEN 'Data File'
+WHEN 1 THEN 'Log File'
+END AS FileType
+,PIOR.io_type AS InputOutputOperationType
+,PIOR.io_pending AS Is_Request_Pending
+,PIOR.io_handle
+,PIOR.scheduler_address
+FROM sys.dm_io_pending_io_requests AS PIOR
+INNER JOIN sys.dm_io_virtual_file_stats(DB_ID('[AdventureWorks2012
+]'),NULL) AS VFS
+ON PIOR.io_handle = VFS.file_handle
+INNER JOIN sys.master_files AS MF
+ON VFS.database_id = MF.database_id AND VFS.file_id = MF.file_id
+GO
+
+
+
+DMFs:
+dm_io_virtual_file_stats() :  statistics for the read/write operations performed on data files and log files of all or
+a given database. It accepts two parameters, which are database_id and file_id
+ 
+
+
+dm_io_pending_io_requests DMV:  returns a list of requests that are pending for input/output
