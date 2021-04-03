@@ -1,0 +1,15 @@
+Use the system function sys.fn_validate_plan_guide, which allows you to check the validity of existing plan
+guides.
+
+USE AdventureWorks2014;
+GO
+SELECT pg.plan_guide_id, pg.name, v.msgnum,
+v.severity, v.state, v.message
+FROM sys.plan_guides pg
+CROSS APPLY sys.fn_validate_plan_guide(pg.plan_guide_id) v;
+
+
+
+
+If this query returns no rows, this means there are no errors with existing plan guides. If rows are generated,
+you will need to re-create a valid plan guide based on the changed circumstances.
