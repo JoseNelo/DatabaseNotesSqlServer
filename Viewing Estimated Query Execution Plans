@@ -1,0 +1,20 @@
+Viewing Estimated Query Execution Plans
+
+See how SQL Server is executing that query.
+three commands can be used to view detailed information about a query execution plan
+for a SQL statement or batch.
+  Use the following Transact-SQL commands: SET SHOWPLAN_ALL, SET SHOWPLAN_TEXT, and SET SHOWPLAN_XML
+  commands provide you with the plan information without executing the query
+  
+  USE AdventureWorks2012;
+GO
+SET SHOWPLAN_XML ON;
+GO
+SELECT p.Name, p.ProductNumber, r.ReviewerName
+FROM Production.Product p
+INNER JOIN Production.ProductReview r
+ON p.ProductID = r.ProductID
+WHERE r.Rating > 2;
+GO
+SET SHOWPLAN_XML OFF;
+GO
