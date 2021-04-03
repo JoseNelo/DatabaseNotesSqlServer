@@ -1,0 +1,67 @@
+scan is not always bad and seek is not always good,
+
+
+Indexes tuning
+
+
+USE AdventureWorks2014
+GO
+if object_id('SalesOrdHeaderDemo') is not null
+begin
+drop table SalesOrdHeaderDemo
+end
+GO
+if object_id('SalesOrdDetailDemo') is not null
+begin
+drop table SalesOrdDetailDemo
+end
+GO
+Select * Into SalesOrdHeaderDemo
+from Sales.SalesOrderHeader
+GO
+Select * Into SalesOrdDetailDemo
+from Sales.SalesOrderDetail
+GO
+
+SELECT
+sh.SalesOrderID
+FROM
+SalesOrdHeaderDemo AS sh
+JOIN
+SalesOrdDetailDemo AS sd
+ON
+sh.SalesOrderID=sd.SalesOrderID
+WHERE
+sh.OrderDate='2005-07-01 00:00:00.000'
+GO
+
+CREATE UNIQUE CLUSTERED INDEX idx_salesorderheaderdemo_SalesOrderID ON SalesOrdHeaderDemo (SalesOrderID)
+GO
+
+SELECT
+sh.SalesOrderID
+FROM
+SalesOrdHeaderDemo AS sh
+JOIN
+SalesOrdDetailDemo AS sd
+ON
+sh.SalesOrderID=sd.SalesOrderID
+WHERE
+sh.OrderDate='2005-07-01 00:00:00.000'
+GO
+
+CREATE UNIQUE CLUSTERED INDEX idx_SalesDetail_SalesOrderlID ON
+SalesOrdDetailDemo (SalesOrderID,SalesOrderDetailID)
+GO
+
+SELECT
+sh.SalesOrderID
+FROM
+SalesOrdHeaderDemo AS sh
+JOIN
+SalesOrdDetailDemo AS sd
+ON
+sh.SalesOrderID=sd.SalesOrderID
+WHERE
+sh.OrderDate='2005-07-01 00:00:00.000'
+GO
