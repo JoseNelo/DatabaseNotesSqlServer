@@ -1,0 +1,220 @@
+Monitoring system health using system
+statistical functions
+
+ff @@CONNECTIONS
+ff @@TIMETICKS
+ff @@CPU_BUSY
+ff @@IDLE
+ff @@IO_BUSY
+ff @@PACK_RECEIVED
+ff @@PACK_SENT
+ff @@PACKET_ERRORS
+ff @@TOTAL_READ
+ff @@TOTAL_WRITE
+ff @@TOTAL_ERRORS
+
+--Creating a table to store server health
+--statistics data if the table does not exist.
+IF OBJECT_ID('[dbo].[tbl_ServerHealthStatistics]') IS NULL
+BEGIN
+CREATE TABLE [dbo].[tbl_ServerHealthStatistics]
+(
+ID INT IDENTITY(1,1)
+,StatDateTime DATETIME DEFAULT GETDATE()
+,TotalConnections INT
+,TimeTicks INT
+,TotalCPUBusyTime INT
+,TotalCPUIdleTime INT
+,TotalIOBusyTime INT
+,TotalReceivedPackets INT
+,TotalSentPackets INT
+,TotalErrorsInNetworkPackets INT
+,TotalPhysicalReadOperations INT
+,TotalWriteOperations INT
+,TotalReadWriteErrors INT
+)
+END
+GO
+
+
+--Collect and store server health statistics
+--data in our table.
+INSERT INTO [dbo].[tbl_ServerHealthStatistics]
+(
+TotalConnections
+,TimeTicks
+,TotalCPUBusyTime
+,TotalCPUIdleTime
+,TotalIOBusyTime
+,TotalReceivedPackets
+,TotalSentPackets
+,TotalErrorsInNetworkPackets
+,TotalPhysicalReadOperations
+,TotalWriteOperations
+,TotalReadWriteErrors
+)
+SELECT
+@@CONNECTIONS AS TotalConnections
+,@@TIMETICKS AS TimeTicks
+,@@CPU_BUSY AS TotalCPUBusyTime
+,@@IDLE AS TotalCPUIdleTime
+,@@IO_BUSY AS TotalIOBusyTime
+,@@PACK_RECEIVED AS TotalReceivedPackets
+,@@PACK_SENT AS TotalSentPackets
+,@@PACKET_ERRORS AS TotalErrorsInNetworkPackets
+,@@TOTAL_READ AS TotalPhysicalReadOperations
+,@@TOTAL_WRITE AS TotalWriteOperations
+,@@TOTAL_ERRORS AS TotalReadWriteErrors
+GO
+
+--Display the collected server health
+--statistics data.
+WITH cteStatistics AS
+(
+SELECT
+ID
+,StatDateTime
+,TotalConnections
+,TotalCPUBusyTime*CAST(TimeTicks AS BIGINT)
+AS TotalCPUBusyTime
+,TotalCPUIdleTime*CAST(TimeTicks AS BIGINT)
+AS TotalCPUIdleTime
+,TotalIOBusyTime*CAST(TimeTicks AS BIGINT)
+AS TotalIOBusyTime
+,TotalReceivedPackets
+,TotalSentPackets
+,TotalErrorsInNetworkPackets
+,TotalPhysicalReadOperations
+,TotalWriteOperations
+,TotalReadWriteErrors
+FROM [dbo].[tbl_ServerHealthStatistics]
+)
+SELECT
+Cur.TotalConnections AS CurrentConnections
+,Cur.StatDateTime AS CurrentStatDateTime
+,Prev.TotalConnections AS PreviousConnections
+,Prev.StatDateTime AS Previous_StatDateTime
+,Cur.TotalConnections - Prev.TotalConnections AS
+ConnectionsIncreamentedBy
+,DATEDIFF(millisecond, Prev.StatDateTime, Cur.StatDateTime)
+AS ConnectionsIncreamentedIn
+FROM cteStatistics AS Cur
+LEFT OUTER JOIN cteStatistics AS Prev
+ON Cur.ID = Prev.ID + 1
+
+
+Monitoring with system stored procedure
+
+
+commonly used before dynamic views
+were introduced for troubleshooting performance issues:
+ff sp_monitor
+ff sp_who2
+ff sp_who
+
+sp_who is a system stored procedure that provides detailed information on current SQL
+Server processes, sessions, and requests. This information can be used to know: what
+operations/commands are being performed by whom and the processes that block other
+processes and introduce blocking issues
+
+sp_who accepts optional parameters, which are @loginame(type sysname), session
+ID (type smallint), and ACTIVE
+
+professionals—sp_who2. This stored procedure provides
+additional columns, such as CPUTime, DiskIO, LastBatch, and ProgramName. sp_who2
+is undocumented
+
+--Creating table to store the output
+--sp_who stored procedures.
+CREATE TABLE dbo.#tbl_SPWho
+(
+spid SMALLINT
+,ecid SMALLINT
+,status NVARCHAR(30)
+,loginame NVARCHAR(128)
+,hostName NVARCHAR(128)
+,blk CHAR(5)
+,dbname NVARCHAR(128)
+,cmd NVARCHAR(16)
+,request_id INT
+)
+
+--Insert the result of sp_who stored procedure
+--into table.
+INSERT INTO dbo.#tbl_SPWho
+EXECUTE sp_who
+GO
+
+
+--Check if the table exists. If it does,
+--drop it first.
+
+IF OBJECT_ID('tempdb.dbo.#tbl_SPWho2') IS NOT NULL
+BEGIN
+DROP TABLE tempdb.dbo.#tbl_SPWho2
+END
+CREATE TABLE dbo.#tbl_SPWho2
+(
+SPID SMALLINT
+,Status NVARCHAR(30)
+,Login NVARCHAR(128)
+,HostName NVARCHAR(128)
+,BlkBy CHAR(5)
+,DBName NVARCHAR(128)
+,Command NVARCHAR(16)
+,CPUTime INT
+,DiskIO INT
+,LastBatch NVARCHAR(50)
+,ProgramName NVARCHAR(100)
+,SPID2 SMALLINT
+,REQUESTID INT
+)
+INSERT INTO dbo.#tbl_SPWho2
+EXECUTE sp_who2
+
+--Looking at only processes for
+--a particular database.
+SELECT
+spid AS SessionID
+,ecid AS ExecutionContextID
+,status AS ProcessStatus
+,loginame AS LoginName
+,hostName AS HostName
+,blk AS BlockedBy
+,dbname AS DatabaseName
+,cmd AS CommandType
+,request_id AS RequestID
+FROM dbo.#tbl_SPWho
+WHERE dbname = 'AdventureWorks2014'
+GO
+
+--Looking at only blocked requests.
+SELECT
+spid AS SessionID
+,ecid AS ExecutionContextID
+,status AS ProcessStatus
+,loginame AS LoginName
+,hostName AS HostName
+,blk AS BlockedBy
+,dbname AS DatabaseName
+,cmd AS CommandType
+,request_id AS RequestID
+FROM dbo.#tbl_SPWho
+WHERE blk > 0
+
+--Looking at only suspended processes.
+SELECT
+SPID AS SessionID
+,Status AS ProcessStatus
+,CPUTime
+,DiskIO
+,ProgramName
+,Login AS LoginName
+,HostName AS HostName
+,BlkBy AS BlockedBy
+,DBName AS DatabaseName
+,Command AS CommandType
+,REQUESTID AS RequestID
+FROM dbo.#tbl_SPWho2
+WHERE status = 'suspended'
+
