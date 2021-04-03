@@ -1,0 +1,14 @@
+DMV:
+sys.dm_exec_connections     conexiones activas
+sys.dm_exec_sessions        lista las sesiones activas.
+sys.dm_exec_requests        Peticiones al server, long-running y intensive queries.
+sys.dm_exec_sql_text        SQL text for the T-SQL query or batch
+sys.dm_exec_cached_plans
+sys.dm_exec_procedure_stats
+sys.dm_exec_query_stats
+
+DMF:
+sys.dm_exec_query_plan()    returns the query execution plan for a specified plan_handle
+sys.dm_exec_cursors()       list of cursors that are currently open for a given session_id or all sessions  -select * from sys.dm_exec_cursors(0);-
+sys.dm_exec_cached_plans
+sys.dm_exec_cached_plan_dependent_objects
