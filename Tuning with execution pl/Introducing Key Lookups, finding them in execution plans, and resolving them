@@ -1,0 +1,8 @@
+Key Lookup is used
+by SQL Server while retrieving information regarding non-key column.
+
+ Clustered index
+ Non-clustered index
+When you have predicate based on key field of non-clustered index, which meets seek on the
+same index and goes to clustered index to retrieve the data for non-key field of non-clustered
+index, it generates Key Lookup,
