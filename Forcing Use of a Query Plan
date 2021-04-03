@@ -1,0 +1,11 @@
+The USE PLAN command allows you to force the query optimizer to use an existing, specific query plan for a
+SELECT query.
+USE PLAN N'xml_plan'
+
+plan can be derived using several methods, including SET SHOWPLAN_XML, SET STATISTICS XML, the
+sys.dm_exec_query_plan DMV, sys.dm_exec_text_query_plan
+
+SET STATISTICS XML ON to capture the query’s XML execution plan definition. That definition was then copied into the OPTION clause
+
+The USE PLAN hint requires a Unicode format,
+so the XML document text was prefixed with an N'
