@@ -1,0 +1,28 @@
+sp_configure system stored procedure
+SQL Server Management Studio;
+
+SELECT
+*
+FROM
+sys.configurations
+ORDER BY
+name
+GO
+
+
+sp_configure
+GO
+
+list of all configuration options available with the SP_Configure
+sp_configure 'show advanced options', 1;
+GO
+RECONFIGURE WITH OVERRIDE;
+GO
+
+EXEC sp_configure 'recovery interval', 5
+RECONFIGURE WITH OVERRIDE
+GO
+
+EXEC sp_configure 'index create memory (KB)',1024
+RECONFIGURE WITH OVERRIDE
+GO
