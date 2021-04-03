@@ -1,0 +1,15 @@
+Existen  factores claves que influyen tanto en el desempeno como en la integridad de los datos, el diseno impacta las lecturas 
+y las actualizaciones en su desempeno:
+Diseno:
+EL estandar diseno afecta basicamente a las BD normalizadas OLTP, que se basan en la integridad, redundancia,  y el establecimiento de las relaciones entre  multiples entidades,
+Este diseno es mas apropiado para BD de transacciones muy rapidas, en contraste con DWH design, es mas frecuente la desnormalziacion star o snowflake, ese diseno usa una
+tabla central que es relacionada (join) con una o varias tablas llamadas descripcion tables, en el diseno snowflake esta mas orientado a la velocidad de los queries que en 
+la velocidad de los updates.
+
+Configuraciones: Una pobre configuracion puede llevar a problemas de performance.
+
+HArdware: Your choice of processor architecture, available memory, and disk subsystem can have a significant
+impact on query performance.
+
+Networks:
+The time it takes to obtain query results can be impacted by a slow or unstable network connection.
